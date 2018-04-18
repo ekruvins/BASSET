@@ -1,0 +1,143 @@
+/*******************************************************************************
+*         McStas instrument definition URL=http://www.mcstas.org
+*
+* Instrument: test (rename also the example and DEFINE lines below)
+*
+* %Identification
+* Written by: Your name (email)
+* Date: Current Date
+* Origin: Your institution
+* Release: McStas
+* Version: 0.2
+* %INSTRUMENT_SITE: Institution_name_as_a_single word
+*
+* Instrument short description
+*
+* %Description
+* Instrument longer description (type, elements, usage...)
+*
+* Example: mcrun test.instr <parameters=values>
+*
+* %Parameters
+* Par1: [unit] Parameter1 description
+*
+* %Link
+* A reference/HTML link for more information
+*
+* %End
+*******************************************************************************/
+
+/* Change name of instrument and input parameters with default values */
+DEFINE INSTRUMENT NSE_res(double arm_lenght = 3, double slit_w = 0.03)
+
+
+DECLARE
+%{
+
+double slit_h;
+
+%}
+
+
+INITIALIZE
+%{
+%}
+
+
+TRACE
+
+
+COMPONENT Origin = Progress_bar()
+  AT (0,0,0) ABSOLUTE
+
+COMPONENT source =  Source_gen(
+	yheight=0.00001,xwidth=slit_w, lambda0=9, dlambda=0.00000000000001,I1=1e13,
+	verbose=1,focus_xw=slit_w,focus_yh=0.0001, dist = arm_lenght)
+	AT (0, 0, 0)  RELATIVE Origin
+  EXTEND
+  %{
+     t = rand0max(1e-8); // set time from 0 to 1 ms for TOF instruments.
+  %}
+	
+
+COMPONENT mon_TOF_source = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "time, limits=[0.000000001 0.3], bins=180, lambda, limits=[8.9 9.1], bins=180")
+	AT (0, 0, 0.00001) RELATIVE PREVIOUS
+
+COMPONENT monitor_lambda_source = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "lambda, limits = [8.9999999999, 9.00000001], bins = 180")
+	AT (0, 0, 0.00001) RELATIVE PREVIOUS
+
+
+COMPONENT first_arm = Arm()
+	AT (0, 0, 0.000001) RELATIVE PREVIOUS
+
+	COMPONENT slit_first = Slit(xwidth = slit_w, yheight = 0.00001)
+		AT (0, 0, 0) RELATIVE first_arm
+
+
+COMPONENT second_arm = Arm()
+	AT (0, 0, arm_lenght) RELATIVE first_arm
+	
+	COMPONENT slit_s = Slit(xwidth = slit_w, yheight = 0.00001)
+		AT (0, 0, 0) RELATIVE second_arm
+
+	COMPONENT slit_f = Slit(xwidth = slit_w, yheight = 0.00001)
+		AT (0, 0, arm_lenght) RELATIVE second_arm
+
+COMPONENT mon_TOF_end = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "time bins=180, lambda, limits=[29 31], bins=180")
+	AT (0, 0, 0.001) RELATIVE PREVIOUS
+
+COMPONENT monitor_lambda_end = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "lambda, limits = [8.99, 9.01], bins = 180")
+	AT (0, 0, 0.001) RELATIVE PREVIOUS
+
+
+COMPONENT monitor_time_end_9 = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "time, limits = [0.0136569, 0.013657] bins = 200")
+	AT (0, 0, 0.001) RELATIVE PREVIOUS
+
+
+COMPONENT monitor_time_end_30 = Monitor_nD(
+	xwidth = 0.4, yheight = 0.4, restore_neutron = 1,
+	options = "time, limits = [0.0455305, 0.0455307] bins = 200")
+	AT (0, 0, 0.001) RELATIVE PREVIOUS
+
+
+
+FINALLY
+%{
+%}
+
+END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
